@@ -36,6 +36,6 @@ A continuación se detallan los entregables requeridos, organizados según las i
 
 ### 4. Manuales
 - [Manual de Usuario](./manualUsuario.pdf)
-- [Manual de Instalación](./manualInstalacion.pdf)
+- [Manual de Instalación](./Manual%20Instalación.md)
 
 ---
