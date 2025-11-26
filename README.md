@@ -29,7 +29,6 @@ A continuación se detallan los entregables requeridos, organizados según las i
 
 ### 2. Desarrollo e Implementación
 - [Documentación del Ambiente de Desarrollo](./docAmbDesarrollo.pdf)
-- [Documentación Técnica](./docTecnica.pdf)
 
 ### 3. Calidad de Software
 - [Documentación de Casos de Prueba](./docCasosPrueba.pdf)
