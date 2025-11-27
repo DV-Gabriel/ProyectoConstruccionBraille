@@ -9,34 +9,83 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Repository interface for Conversion entity operations.
+ */
 @Repository
 public interface ConversionRepository extends JpaRepository<Conversion, Long> {
     
-    // Obtener conversiones de un usuario específico
+    /**
+     * Finds conversions by user.
+     *
+     * @param user the user
+     * @return list of conversions
+     */
     List<Conversion> findByUser(User user);
     
-    // Obtener conversiones de un usuario ordenadas por fecha
+    /**
+     * Finds conversions by user ordered by date descending.
+     *
+     * @param user the user
+     * @return list of conversions
+     */
     List<Conversion> findByUserOrderByFechaDesc(User user);
     
-    // Obtener conversiones por tipo
+    /**
+     * Finds conversions by type.
+     *
+     * @param tipo the conversion type
+     * @return list of conversions
+     */
     List<Conversion> findByTipo(String tipo);
     
-    // Obtener últimas N conversiones de un usuario
+    /**
+     * Finds top 10 conversions by user ordered by date descending.
+     *
+     * @param user the user
+     * @return list of conversions
+     */
     List<Conversion> findTop10ByUserOrderByFechaDesc(User user);
     
-    // Obtener conversiones de un usuario filtradas por tipo
+    /**
+     * Finds conversions by user and type ordered by date descending.
+     *
+     * @param user the user
+     * @param tipo the conversion type
+     * @return list of conversions
+     */
     List<Conversion> findByUserAndTipoOrderByFechaDesc(User user, String tipo);
     
-    // Eliminar todas las conversiones de un usuario
+    /**
+     * Deletes conversions by user.
+     *
+     * @param user the user
+     */
     void deleteByUser(User user);
     
-    // Contar conversiones por usuario
+    /**
+     * Counts conversions by user.
+     *
+     * @param user the user
+     * @return the count
+     */
     long countByUser(User user);
     
-    // Contar conversiones por usuario y tipo
+    /**
+     * Counts conversions by user and type.
+     *
+     * @param user the user
+     * @param tipo the conversion type
+     * @return the count
+     */
     long countByUserAndTipo(User user, String tipo);
     
-    // Obtener estadísticas de caracteres convertidos
+    /**
+     * Sums original text length by user.
+     *
+     * @param user the user
+     * @return the sum
+     */
     @Query("SELECT SUM(c.longitudOriginal) FROM Conversion c WHERE c.user = :user")
     Long sumLongitudOriginalByUser(@Param("user") User user);
 }

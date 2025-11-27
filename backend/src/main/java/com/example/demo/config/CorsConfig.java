@@ -10,12 +10,20 @@ import org.springframework.web.filter.CorsFilter;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Configuration class for CORS (Cross-Origin Resource Sharing) settings.
+ */
 @Configuration
 public class CorsConfig {
 
     @Value("${cors.allowed.origins:http://localhost:3000}")
     private String allowedOrigins;
 
+    /**
+     * Creates a CORS filter bean to handle cross-origin requests.
+     *
+     * @return the configured CorsFilter
+     */
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();

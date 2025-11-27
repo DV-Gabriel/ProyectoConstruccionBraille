@@ -8,28 +8,39 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 /**
- * Repository para gestionar señaléticas
+ * Repository interface for Senaletica entity operations.
  */
 @Repository
 public interface SenaleticaRepository extends JpaRepository<Senaletica, Long> {
     
     /**
-     * Encuentra todas las señaléticas de un usuario ordenadas por fecha de creación descendente
+     * Finds all senaleticas by user ordered by creation date descending.
+     *
+     * @param user the user
+     * @return list of senaleticas
      */
     List<Senaletica> findByUserOrderByFechaCreacionDesc(User user);
     
     /**
-     * Encuentra las últimas N señaléticas de un usuario
+     * Finds top 10 senaleticas by user ordered by creation date descending.
+     *
+     * @param user the user
+     * @return list of senaleticas
      */
     List<Senaletica> findTop10ByUserOrderByFechaCreacionDesc(User user);
     
     /**
-     * Encuentra señaléticas por tipo
+     * Finds senaleticas by type.
+     *
+     * @param tipoSenaletica the senaletica type
+     * @return list of senaleticas
      */
     List<Senaletica> findByTipoSenaletica(String tipoSenaletica);
     
     /**
-     * Encuentra señaléticas más descargadas
+     * Finds top 10 most downloaded senaleticas.
+     *
+     * @return list of senaleticas
      */
     List<Senaletica> findTop10ByOrderByDescargasDesc();
 }

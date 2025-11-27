@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * REST controller for API endpoints.
+ */
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = "http://localhost:3000")
@@ -20,12 +23,21 @@ public class ApiController {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Returns a hello message.
+     *
+     * @return a greeting string
+     */
     @GetMapping("/hello")
     public String hello() {
         return "¡Hola desde Spring Boot conectado a Supabase! 🔥";
     }
 
-    // Endpoint de test para verificar conexión
+    /**
+     * Test endpoint to verify backend connection.
+     *
+     * @return a response entity with status information
+     */
     @GetMapping("/test")
     public ResponseEntity<?> test() {
         return ResponseEntity.ok()
@@ -36,13 +48,22 @@ public class ApiController {
             ));
     }
 
-    // Obtener todos los usuarios
+    /**
+     * Retrieves all users.
+     *
+     * @return a list of all users
+     */
     @GetMapping("/users")
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    // Obtener usuario por ID
+    /**
+     * Retrieves a user by ID.
+     *
+     * @param id the user ID
+     * @return a response entity containing the user or not found
+     */
     @GetMapping("/users/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         Optional<User> user = userRepository.findById(id);
@@ -50,7 +71,12 @@ public class ApiController {
                    .orElse(ResponseEntity.notFound().build());
     }
 
-    // Crear nuevo usuario
+    /**
+     * Creates a new user.
+     *
+     * @param user the user to create
+     * @return a response entity with the created user or conflict if email exists
+     */
     @PostMapping("/users")
     public ResponseEntity<User> createUser(@RequestBody User user) {
         // Validar que el email no exista
@@ -61,7 +87,13 @@ public class ApiController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
     }
 
-    // Actualizar usuario
+    /**
+     * Updates an existing user.
+     *
+     * @param id the user ID
+     * @param userDetails the updated user details
+     * @return a response entity with the updated user or not found
+     */
     @PutMapping("/users/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
         Optional<User> userOptional = userRepository.findById(id);
@@ -81,7 +113,12 @@ public class ApiController {
         return ResponseEntity.ok(updatedUser);
     }
 
-    // Eliminar usuario
+    /**
+     * Deletes a user by ID.
+     *
+     * @param id the user ID
+     * @return a response entity indicating success or not found
+     */
     @DeleteMapping("/users/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         if (!userRepository.existsById(id)) {
@@ -91,7 +128,12 @@ public class ApiController {
         return ResponseEntity.noContent().build();
     }
 
-    // Buscar usuario por email
+    /**
+     * Retrieves a user by email.
+     *
+     * @param email the user email
+     * @return a response entity containing the user or not found
+     */
     @GetMapping("/users/email/{email}")
     public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
         Optional<User> user = userRepository.findByEmail(email);

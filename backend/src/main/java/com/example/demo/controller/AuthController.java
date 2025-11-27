@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * Controlador REST para autenticación de usuarios
+ * REST controller for user authentication.
  */
 @RestController
 @RequestMapping("/api/auth")
@@ -23,7 +23,10 @@ public class AuthController {
     }
     
     /**
-     * POST /api/auth/register - Registrar nuevo usuario
+     * Registers a new user.
+     *
+     * @param request the registration request containing user details
+     * @return a response entity with the authentication response
      */
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
@@ -53,7 +56,10 @@ public class AuthController {
     }
     
     /**
-     * POST /api/auth/login - Iniciar sesión
+     * Logs in a user.
+     *
+     * @param request the login request containing email and password
+     * @return a response entity with the authentication response
      */
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
@@ -78,7 +84,10 @@ public class AuthController {
     }
     
     /**
-     * GET /api/auth/user/{id} - Obtener datos de usuario por ID
+     * Gets user data by ID.
+     *
+     * @param id the user ID
+     * @return a response entity with the user data or not found
      */
     @GetMapping("/user/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {

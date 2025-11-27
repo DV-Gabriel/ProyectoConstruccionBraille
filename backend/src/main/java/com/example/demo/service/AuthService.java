@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
- * Servicio para autenticación y gestión de usuarios
+ * Service for authentication and user management.
  */
 @Service
 public class AuthService {
@@ -24,7 +24,10 @@ public class AuthService {
     }
     
     /**
-     * Registra un nuevo usuario
+     * Registers a new user.
+     *
+     * @param request the registration request
+     * @return the authentication response
      */
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -55,7 +58,10 @@ public class AuthService {
     }
     
     /**
-     * Autentica un usuario
+     * Authenticates a user.
+     *
+     * @param request the login request
+     * @return the authentication response
      */
     @Transactional
     public AuthResponse login(LoginRequest request) {
@@ -88,7 +94,10 @@ public class AuthService {
     }
     
     /**
-     * Obtiene un usuario por ID (sin contraseña)
+     * Gets a user by ID (without password).
+     *
+     * @param id the user ID
+     * @return an optional user DTO
      */
     public Optional<AuthResponse.UserDTO> getUserById(Long id) {
         return userRepository.findById(id)
@@ -96,7 +105,10 @@ public class AuthService {
     }
     
     /**
-     * Mapea User a UserDTO (sin contraseña)
+     * Maps User to UserDTO (without password).
+     *
+     * @param user the user entity
+     * @return the user DTO
      */
     private AuthResponse.UserDTO mapToUserDTO(User user) {
         return new AuthResponse.UserDTO(
