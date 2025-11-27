@@ -16,7 +16,7 @@ import java.util.List;
  * Controller para endpoints de conversión Braille
  * 
  * Endpoints:
- * - POST /api/convertir - Convierte texto <-> Braille
+ * - POST /api/convertir - Convierte texto &lt;-&gt; Braille
  * - GET /api/historial - Obtiene historial de conversiones
  * - GET /api/historial/recientes - Últimas 10 conversiones
  * - DELETE /api/historial/{id} - Elimina una conversión del historial
@@ -35,7 +35,7 @@ public class BrailleController {
     }
     
     /**
-     * Historia 4 & 5: Endpoint de conversión texto ↔ Braille
+     * Historia 4 &amp; 5: Endpoint de conversión texto ↔ Braille
      * 
      * POST /api/convertir
      * Body: {
