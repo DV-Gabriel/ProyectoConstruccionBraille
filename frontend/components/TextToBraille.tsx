@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { textToBraille, canConvertToBraille } from '@/lib/braille-converter';
 import { addConversionToHistory } from './ConversionHistory';
 import ConversionHistory from './ConversionHistory';
-import { Hand, Copy, RotateCcw, Sparkles, Wifi, WifiOff } from 'lucide-react';
+import { Hand, Copy, RotateCcw, Sparkles, Wifi, WifiOff, Download, FileText, Image as ImageIcon } from 'lucide-react';
 import { useConversion, useBackendStatus } from '@/lib/hooks/useApi';
 import { useTheme } from '@/context/ThemeContext';
 
@@ -14,6 +14,7 @@ export default function TextToBraille() {
   const [error, setError] = useState('');
   const [showHistory, setShowHistory] = useState(false);
   const [isConverting, setIsConverting] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   
   // Hooks para backend
   const { convertir, loading: apiLoading } = useConversion();
@@ -105,6 +106,196 @@ export default function TextToBraille() {
     setInputText('');
     setBrailleOutput('');
     setError('');
+  };
+
+  // Funciones de descarga usando Canvas nativo
+  const downloadAsPNG = () => {
+    if (!brailleOutput) {
+      alert('Primero convierte algún texto a Braille');
+      return;
+    }
+    
+    setIsDownloading(true);
+    try {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('No se pudo crear el contexto del canvas');
+
+      // Configuración del canvas
+      const padding = 60;
+      const fontSize = 48;
+      const lineHeight = fontSize * 1.8;
+      const titleSize = 24;
+      
+      // Colores fijos (evitar CSS computado con lab())
+      const bgColor1 = isDark ? '#0A0E27' : '#F8F9FF';
+      const bgColor2 = isDark ? '#151937' : '#FFFFFF';
+      const borderColor = '#4F46E5';
+      const titleColor = isDark ? '#8B92B8' : '#64748B';
+      const textColor = isDark ? '#06B6D4' : '#4F46E5';
+      
+      // Dividir texto en líneas
+      ctx.font = `${fontSize}px Arial`;
+      const maxCharsPerLine = 15;
+      const brailleLines = brailleOutput.match(new RegExp(`.{1,${maxCharsPerLine}}`, 'g')) || [brailleOutput];
+      
+      // Calcular dimensiones
+      const maxWidth = Math.max(
+        ctx.measureText(brailleLines.reduce((a, b) => a.length > b.length ? a : b, '')).width,
+        400
+      );
+      
+      canvas.width = maxWidth + padding * 2;
+      canvas.height = brailleLines.length * lineHeight + padding * 2 + 80;
+
+      // Fondo con gradiente
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      gradient.addColorStop(0, bgColor1);
+      gradient.addColorStop(1, bgColor2);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Borde decorativo
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = 4;
+      ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+
+      // Título
+      ctx.font = `bold ${titleSize}px Arial`;
+      ctx.fillStyle = titleColor;
+      ctx.textAlign = 'center';
+      ctx.fillText('Texto a Braille', canvas.width / 2, padding);
+
+      // Texto Braille
+      ctx.font = `${fontSize}px Arial`;
+      ctx.fillStyle = textColor;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      
+      brailleLines.forEach((line, index) => {
+        ctx.fillText(line, canvas.width / 2, padding + 40 + index * lineHeight);
+      });
+
+      // Descargar
+      const link = document.createElement('a');
+      link.download = `braille-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('Error PNG:', err);
+      alert('Error al generar PNG: ' + (err instanceof Error ? err.message : 'Error desconocido'));
+      alert('Error al generar PNG');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const downloadAsPDF = () => {
+    if (!brailleOutput) return;
+    
+    setIsDownloading(true);
+    try {
+      // Crear canvas para el PDF
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('No se pudo crear el contexto');
+
+      // Tamaño A4 en píxeles (72 DPI)
+      const a4Width = 595;
+      const a4Height = 842;
+      canvas.width = a4Width;
+      canvas.height = a4Height;
+
+      // Fondo blanco
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Borde
+      ctx.strokeStyle = '#4F46E5';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+
+      // Título principal
+      ctx.font = 'bold 28px Arial, sans-serif';
+      ctx.fillStyle = '#4F46E5';
+      ctx.textAlign = 'center';
+      ctx.fillText('CONVERSIÓN BRAILLE', canvas.width / 2, 70);
+
+      // Línea decorativa
+      ctx.beginPath();
+      ctx.moveTo(100, 90);
+      ctx.lineTo(canvas.width - 100, 90);
+      ctx.strokeStyle = '#E2E8F0';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Texto original
+      ctx.font = 'bold 16px Arial, sans-serif';
+      ctx.fillStyle = '#64748B';
+      ctx.textAlign = 'left';
+      ctx.fillText('Texto Original:', 50, 130);
+
+      ctx.font = '14px Arial, sans-serif';
+      ctx.fillStyle = '#1E293B';
+      const inputLines = inputText.match(/.{1,60}/g) || [inputText];
+      inputLines.slice(0, 5).forEach((line, i) => {
+        ctx.fillText(line, 50, 155 + i * 20);
+      });
+
+      // Resultado Braille
+      ctx.font = 'bold 16px Arial, sans-serif';
+      ctx.fillStyle = '#64748B';
+      ctx.fillText('Resultado en Braille:', 50, 280);
+
+      ctx.font = '36px monospace';
+      ctx.fillStyle = '#4F46E5';
+      ctx.textAlign = 'center';
+      const brailleLines = brailleOutput.match(/.{1,12}/g) || [brailleOutput];
+      brailleLines.slice(0, 8).forEach((line, i) => {
+        ctx.fillText(line, canvas.width / 2, 330 + i * 50);
+      });
+
+      // Fecha
+      ctx.font = '12px Arial, sans-serif';
+      ctx.fillStyle = '#94A3B8';
+      ctx.textAlign = 'center';
+      ctx.fillText(`Generado: ${new Date().toLocaleString('es-ES')}`, canvas.width / 2, canvas.height - 50);
+
+      // Convertir canvas a PDF usando data URL
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      
+      // Crear HTML con la imagen y abrirlo para imprimir como PDF
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>Braille PDF</title>
+            <style>
+              body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #f0f0f0; }
+              img { max-width: 100%; height: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+              @media print { body { background: white; } img { box-shadow: none; } }
+            </style>
+          </head>
+          <body>
+            <img src="${imgData}" alt="Braille PDF" />
+            <script>
+              setTimeout(() => { window.print(); }, 500);
+            </script>
+          </body>
+          </html>
+        `);
+        printWindow.document.close();
+      }
+    } catch (err) {
+      console.error('Error PDF:', err);
+      alert('Error al generar PDF');
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -339,6 +530,8 @@ export default function TextToBraille() {
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 marginBottom: '16px',
+                flexWrap: 'wrap',
+                gap: '10px',
               }}>
                 <h3 style={{
                   fontSize: '16px',
@@ -348,32 +541,78 @@ export default function TextToBraille() {
                 }}>
                   🎯 Resultado en Braille
                 </h3>
-                <button
-                  onClick={handleCopy}
-                  style={{
-                    padding: '8px 14px',
-                    background: theme.primary,
-                    border: 'none',
-                    borderRadius: '8px',
-                    color: '#FFFFFF',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    transition: 'all 0.2s',
-                  }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.background = theme.secondary;
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.background = theme.primary;
-                  }}
-                >
-                  <Copy size={14} />
-                  Copiar
-                </button>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={handleCopy}
+                    style={{
+                      padding: '8px 14px',
+                      background: theme.primary,
+                      border: 'none',
+                      borderRadius: '8px',
+                      color: '#FFFFFF',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.background = theme.secondary;
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.background = theme.primary;
+                    }}
+                  >
+                    <Copy size={14} />
+                    Copiar
+                  </button>
+                  <button
+                    onClick={downloadAsPNG}
+                    disabled={isDownloading}
+                    style={{
+                      padding: '8px 14px',
+                      background: isDownloading ? theme.border : 'linear-gradient(135deg, #8B5CF6, #EC4899)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      color: '#FFFFFF',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      cursor: isDownloading ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      transition: 'all 0.2s',
+                      opacity: isDownloading ? 0.6 : 1,
+                    }}
+                  >
+                    <ImageIcon size={14} />
+                    PNG
+                  </button>
+                  <button
+                    onClick={downloadAsPDF}
+                    disabled={isDownloading}
+                    style={{
+                      padding: '8px 14px',
+                      background: isDownloading ? theme.border : 'linear-gradient(135deg, #10B981, #059669)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      color: '#FFFFFF',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      cursor: isDownloading ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      transition: 'all 0.2s',
+                      opacity: isDownloading ? 0.6 : 1,
+                    }}
+                  >
+                    <FileText size={14} />
+                    PDF
+                  </button>
+                </div>
               </div>
               <div
                 style={{
@@ -384,6 +623,9 @@ export default function TextToBraille() {
                   fontFamily: 'monospace',
                   color: theme.secondary,
                   letterSpacing: '4px',
+                  padding: '20px',
+                  background: isDark ? theme.card : '#F8F9FF',
+                  borderRadius: '12px',
                 }}
                 aria-label="Resultado en Braille"
               >
